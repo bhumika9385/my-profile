@@ -1,0 +1,313 @@
+@import "tailwindcss";
+
+/* ───────────────────────── Design tokens ───────────────────────── */
+@theme {
+  /* surfaces */
+  --color-ink: #05060d;
+  --color-ink-2: #0b0d18;
+  --color-ink-3: #12152a;
+  /* text */
+  --color-paper: #eef1f8;
+  --color-paper-2: #b9c1d6;
+  --color-mute: #8a93aa;
+  --color-dim: #586179;
+  /* accents */
+  --color-signal: #ff3b47; /* spidey red — primary accent */
+  --color-violet: #3d6bff; /* spidey blue */
+  --color-pink: #ff7a85; /* light red */
+  --color-line: rgb(120 140 255 / 0.12); /* dark-blue hairlines */
+  --color-line-strong: rgb(130 150 255 / 0.22);
+
+  --font-display: var(--font-archivo), var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+  --font-serif: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-quart: cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+:root {
+  --gutter: clamp(1.25rem, 4vw, 3rem);
+  --nav-h: 4.5rem;
+  --grad: linear-gradient(100deg, #ff2e3d 0%, #d4213c 38%, #3d6bff 100%);
+  color-scheme: dark;
+}
+
+/* ───────────────────────── Base ───────────────────────── */
+html {
+  background: var(--color-ink);
+  color: var(--color-paper);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-sans);
+  overflow-x: clip;
+  min-height: 100svh;
+}
+
+/* soft aurora glows behind everything */
+.aurora {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(40vw 40vw at 8% 12%, rgb(61 107 255 / 0.18), transparent 70%),
+    radial-gradient(36vw 36vw at 92% 8%, rgb(255 46 61 / 0.14), transparent 70%),
+    radial-gradient(44vw 44vw at 12% 92%, rgb(255 46 61 / 0.09), transparent 70%),
+    var(--color-ink);
+}
+
+/* bold, slightly condensed cinematic headings (body copy keeps the base font) */
+h1, h2, h3 {
+  font-family: var(--font-display);
+  font-variation-settings: "wdth" 86;
+  font-weight: 800;
+}
+
+/* halftone comic texture — dots fade in toward the bottom of the viewport */
+body::before {
+  content: "";
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-image: radial-gradient(rgb(255 255 255 / 0.06) 1px, transparent 1.4px);
+  background-size: 9px 9px;
+  -webkit-mask-image: linear-gradient(to top, #000 0%, transparent 55%);
+  mask-image: linear-gradient(to top, #000 0%, transparent 55%);
+}
+
+/* faint spider-web anchored in the bottom-left corner (blue-tinted) */
+.aurora::before {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: min(54vmin, 540px);
+  height: min(54vmin, 540px);
+  background:
+    repeating-conic-gradient(from 0deg at 0% 100%, rgb(130 160 255 / 0.1) 0 0.45deg, transparent 0.45deg 11.25deg),
+    repeating-radial-gradient(circle at 0% 100%, transparent 0 46px, rgb(130 160 255 / 0.08) 46px 47.2px);
+  -webkit-mask-image: radial-gradient(circle at 0% 100%, #000 0%, transparent 72%);
+  mask-image: radial-gradient(circle at 0% 100%, #000 0%, transparent 72%);
+}
+
+/* faint spider-web anchored in the top-right corner */
+.aurora::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: min(62vmin, 640px);
+  height: min(62vmin, 640px);
+  background:
+    repeating-conic-gradient(from 90deg at 100% 0%, rgb(255 255 255 / 0.09) 0 0.45deg, transparent 0.45deg 11.25deg),
+    repeating-radial-gradient(circle at 100% 0%, transparent 0 46px, rgb(255 255 255 / 0.07) 46px 47.2px);
+  -webkit-mask-image: radial-gradient(circle at 100% 0%, #000 0%, transparent 72%);
+  mask-image: radial-gradient(circle at 100% 0%, #000 0%, transparent 72%);
+}
+
+::selection {
+  background: var(--color-signal);
+  color: #fff;
+}
+
+/* Spider cursor replaces the native pointer (fine pointers only; set by CustomCursor) */
+html.has-spider-cursor,
+html.has-spider-cursor * { cursor: none !important; }
+html.has-spider-cursor input,
+html.has-spider-cursor textarea,
+html.has-spider-cursor select,
+html.has-spider-cursor [contenteditable="true"] { cursor: text !important; }
+
+/* Lenis */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-stopped { overflow: hidden; }
+
+:focus-visible {
+  outline: 2px solid var(--color-signal);
+  outline-offset: 3px;
+  border-radius: 8px;
+}
+
+.skip-link {
+  position: fixed;
+  left: 1rem;
+  top: 1rem;
+  z-index: 200;
+  transform: translateY(-200%);
+  background: var(--color-paper);
+  color: var(--color-ink);
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  font-weight: 600;
+}
+.skip-link:focus { transform: none; }
+
+/* ───────────────────────── Utilities ───────────────────────── */
+@utility px-gutter {
+  padding-left: var(--gutter);
+  padding-right: var(--gutter);
+}
+
+@utility container-x {
+  width: 100%;
+  max-width: 80rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--gutter);
+  padding-right: var(--gutter);
+}
+
+@utility text-gradient {
+  background: var(--grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@utility label {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  line-height: 1.2;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+@utility card {
+  /* diamond suit-mesh (two crossed 60° line sets) under a soft sheen */
+  background:
+    repeating-linear-gradient(60deg, rgb(255 255 255 / 0.022) 0 1px, transparent 1px 14px),
+    repeating-linear-gradient(-60deg, rgb(255 255 255 / 0.022) 0 1px, transparent 1px 14px),
+    linear-gradient(180deg, rgb(255 255 255 / 0.04), rgb(255 255 255 / 0.01));
+  border: 1px solid var(--color-line);
+  border-radius: 1.5rem;
+  &:hover { box-shadow: 0 0 0 1px rgb(255 59 71 / 0.18), 0 24px 70px -34px rgb(255 46 61 / 0.5), 0 0 60px -40px rgb(61 107 255 / 0.6); }
+}
+
+@utility chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: 1px solid var(--color-line-strong);
+  background: rgb(255 255 255 / 0.03);
+  border-radius: 999px;
+  padding: 0.35rem 0.8rem;
+  font-size: 0.82rem;
+  line-height: 1.2;
+  color: var(--color-paper-2);
+}
+
+@utility btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  border-radius: 0.9rem;
+  padding: 0.85rem 1.4rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: transform 0.4s var(--ease-out-expo), box-shadow 0.4s, background-color 0.3s, border-color 0.3s, color 0.3s;
+}
+
+@utility btn-primary {
+  background: var(--grad);
+  color: #fff;
+  box-shadow: 0 10px 40px -12px rgb(255 46 61 / 0.7);
+  &:hover { box-shadow: 0 16px 50px -10px rgb(255 46 61 / 0.9); }
+}
+
+@utility btn-ghost {
+  border: 1px solid var(--color-line-strong);
+  background: rgb(255 255 255 / 0.04);
+  color: var(--color-paper);
+  &:hover { border-color: rgb(255 59 71 / 0.6); background: rgb(255 59 71 / 0.08); }
+}
+
+/* gradient hairline border for feature cards */
+.grad-border {
+  position: relative;
+  border-radius: 1.75rem;
+}
+/* spider-web corner detail on feature cards (top-right) */
+.grad-border::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 150px;
+  height: 150px;
+  border-top-right-radius: 1.75rem;
+  background:
+    repeating-conic-gradient(from 90deg at 100% 0%, rgb(255 255 255 / 0.1) 0 0.5deg, transparent 0.5deg 15deg),
+    repeating-radial-gradient(circle at 100% 0%, transparent 0 22px, rgb(255 255 255 / 0.085) 22px 23px);
+  -webkit-mask-image: radial-gradient(circle at 100% 0%, #000 0%, transparent 70%);
+  mask-image: radial-gradient(circle at 100% 0%, #000 0%, transparent 70%);
+}
+.grad-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(140deg, rgb(255 59 71 / 0.55), rgb(61 107 255 / 0.3) 45%, rgb(255 255 255 / 0.04) 72%, rgb(61 107 255 / 0.45));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* web-thread section separators: a red→blue hairline with one dangling strand */
+main > section:not(#top) { position: relative; }
+main > section:not(#top)::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  left: var(--gutter);
+  right: var(--gutter);
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgb(255 59 71 / 0.4) 30%, rgb(61 107 255 / 0.4) 70%, transparent);
+}
+main > section:not(#top)::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 11px;
+  height: 46px;
+  transform: translateX(-50%);
+  background:
+    linear-gradient(rgb(255 255 255 / 0.28), rgb(255 255 255 / 0)) 5px 0 / 1px 34px no-repeat,
+    radial-gradient(circle at 50% 50%, rgb(255 59 71 / 0.9) 0 2px, transparent 2.5px) 0 34px / 11px 11px no-repeat;
+  opacity: 0.55;
+}
+
+@keyframes spin-slow { to { transform: rotate(360deg); } }
+@keyframes scan { 0% { transform: translateY(-10%); } 100% { transform: translateY(110%); } }
+@keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+@keyframes float-y { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+
+/* ───────────────────────── Reduced motion ───────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ───────────────────────── Print (résumé page) ───────────────────────── */
+@media print {
+  html, body { background: #fff !important; color: #111 !important; }
+  .no-print, .aurora, header, footer { display: none !important; }
+}
